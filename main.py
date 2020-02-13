@@ -59,7 +59,7 @@ def get_achievements(user_id):
     return r
 
 @run_async
-def display_kills(bot, update):
+def display_kills(update, context):
     chat_id = update.message.chat_id
     if update.message.reply_to_message is not None:
         user_id = update.message.reply_to_message.from_user.id
@@ -77,10 +77,10 @@ def display_kills(bot, update):
     for n in range(len(kills)):
         msg += "<code>{:<5}</code> <b>{}</b>\n".format(kills[n]['times'],kills[n]['name'])
 
-    bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 @run_async
-def display_killed_by(bot, update):
+def display_killed_by(update, context):
     chat_id = update.message.chat_id
     if update.message.reply_to_message is not None:
         user_id = update.message.reply_to_message.from_user.id
@@ -98,10 +98,10 @@ def display_killed_by(bot, update):
     for n in range(len(killedby)):
         msg += "<code>{:<5}</code> <b>{}</b>\n".format(killedby[n]['times'],killedby[n]['name'])
 
-    bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 @run_async
-def display_deaths(bot, update):
+def display_deaths(update, context):
     chat_id = update.message.chat_id
     if update.message.reply_to_message is not None:
         user_id = update.message.reply_to_message.from_user.id
@@ -126,10 +126,10 @@ def display_deaths(bot, update):
         msg += "<code>{}%</code>   <b>{}</b>   <code>(approx. {})</code>\n".format(deaths[n]['percent'],deaths[n]['method'],round(totalMethod))
 
         """msg += "<code>({}%)</code> <b>{}</b>\n".format(deaths[n]['percent'],deaths[n]['method'])"""
-    bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 @run_async
-def display_search(bot, update, args):
+def display_search(update, context):
     chat_id = update.message.chat_id
     if update.message.reply_to_message is not None:
         user_id = update.message.reply_to_message.from_user.id
@@ -138,9 +138,9 @@ def display_search(bot, update, args):
         user_id = update.message.from_user.id
         name = update.message.from_user.first_name
 
-    print("%s - %s (%d) - search %s" % (str(datetime.datetime.now()+datetime.timedelta(hours=8)), unidecode(name), user_id, args))
+    print("%s - %s (%d) - search %s" % (str(datetime.datetime.now()+datetime.timedelta(hours=8)), unidecode(name), user_id, context.args))
 
-    if len(args) == 0:
+    if len(context.args) == 0:
         msg = "Invalid parameter! Syntax:\n<code>/search [achievement_to_search]</code>\n"
     else:
         found_counter = 0
@@ -151,8 +151,8 @@ def display_search(bot, update, args):
             achv_name = "{}".format(achv[item]['name'])
 
             for n in range(len(achv_name.split())):
-                for word in range(len(args)):
-                    if  achv_name.split()[n].lower().startswith(args[word].lower()):
+                for word in range(len(context.args)):
+                    if  achv_name.split()[n].lower().startswith(context.args[word].lower()):
                         msg += "<code>{}</code>\n".format(achv_name)
                         found_counter+=1
                         break
@@ -160,20 +160,20 @@ def display_search(bot, update, args):
         if found_counter == 0:
             msg += "<b>No matching achievements found!</b>\n"
 
-    bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
 @run_async
-def display_stats(bot, update, args):
+def display_stats(update, context):
     by_id = False
     chat_id = update.message.chat_id
     if update.message.reply_to_message is not None:
         user_id = update.message.reply_to_message.from_user.id
         name = update.message.reply_to_message.from_user.first_name
     else:
-        if args:
+        if context.args:
             try:
-                user_id = int(args[0])
-                name = args[0]
+                user_id = int(context.args[0])
+                name = context.args[0]
                 by_id = True
             except:
                 user_id = update.message.from_user.id
@@ -202,18 +202,18 @@ def display_stats(bot, update, args):
     else:
         msg = "<a href='tg://user?id={}'>{}</a> has not played any games.".format(user_id, name) if not by_id else "{} has not played any games.".format(name)
 
-    bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
 
-def display_about(bot, update):
+def display_about(update, context):
     chat_id = update.message.chat_id
     msg = "Use /stats for stats. Use /achievements or /achv for achivement list."
     msg += "\n\nThis is an edited version to the old `@wolfcardbot`.\n"
     msg += "Click [here](http://pastebin.com/efZ4CPXJ) to check the original source code.\n"
     msg += "Click [here](https://github.com/jeffffc/wwstatsbot) for the source code of the current project."
-    bot.sendMessage(chat_id, msg, parse_mode="Markdown", disable_web_page_preview=True)
+    context.bot.sendMessage(chat_id, msg, parse_mode="Markdown", disable_web_page_preview=True)
 
 
-def startme(bot, update):
+def startme(update, context):
     if update.message.chat.type == 'private':
         update.message.reply_text("Thank you for starting me. "
                                   "Use /stats and /achievements to check your related stats!")
@@ -221,7 +221,7 @@ def startme(bot, update):
         return
 
 @run_async
-def display_achv(bot, update):
+def display_achv(update, context):
     user_id = update.message.from_user.id
     name = update.message.from_user.first_name
 
@@ -231,28 +231,28 @@ def display_achv(bot, update):
 
     try:
         for msg in msgs:
-            bot.sendMessage(chat_id = user_id, text=msg, parse_mode='Markdown')
+            context.bot.sendMessage(chat_id = user_id, text=msg, parse_mode='Markdown')
         if update.message.chat.type != 'private':
             update.message.reply_text("I have sent you your achievement list in PM.")
     except:
-        url = "telegram.me/{}".format(bot.username)
+        url = "telegram.me/{}".format(context.bot.username)
         keyboard = [[InlineKeyboardButton("Start Me!", url=url)]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text("You have to start me in PM first.", reply_markup=reply_markup)
 
 
-def error_handler(bot, update, error):
-    e = str(error).lower()
+def error_handler(update, context):
+    e = str(context.error).lower()
     if "timed out" in e or "not modified" in e or "query_id_invalid" in e:
         return
     msg = "This update caused error.\n"
-    msg += "{}\n\n".format(error.msg)
+    msg += "{}\n\n".format(context.error.msg)
     msg += "```{}```".format(json.dumps(json.loads(update.message.to_json()), indent=2, ensure_ascii=False))
-    bot.send_message(LOG_GROUP_ID, error.msg, parse_mode='Markdown')
+    context.bot.send_message(LOG_GROUP_ID, context.error.msg, parse_mode='Markdown')
 
 
 def main():
-    u = Updater(token=BOT_TOKEN)
+    u = Updater(token=BOT_TOKEN, use_context=True)
     d = u.dispatcher
 
     d.add_handler(CommandHandler('start', startme))
